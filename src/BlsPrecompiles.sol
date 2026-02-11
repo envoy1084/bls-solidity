@@ -133,21 +133,17 @@ library BlsPrecompiles {
      * Output is 32 bytes:
      * - Last byte is 0x01 if pairing holds, 0x00 otherwise
      */
-    function pairing(bytes memory input) internal view returns (bool result) {
-        bytes memory out;
-
+    function pairing(bytes memory input) internal view returns (bytes memory output) {
         assembly {
-            out := mload(0x40)
-            mstore(0x40, add(out, 0x40))
-            mstore(out, 32)
+            output := mload(0x40)
+            mstore(0x40, add(output, 0x40))
+            mstore(output, 32)
 
-            if iszero(staticcall(gas(), PAIRING, add(input, 0x20), mload(input), add(out, 0x20), 32)) { revert(0, 0) }
+            if iszero(staticcall(gas(), PAIRING, add(input, 0x20), mload(input), add(output, 0x20), 32)) {
+                revert(0, 0)
+            }
 
             if iszero(eq(returndatasize(), 32)) { revert(0, 0) }
-        }
-
-        assembly {
-            result := eq(byte(31, mload(add(out, 0x20))), 1)
         }
     }
 
