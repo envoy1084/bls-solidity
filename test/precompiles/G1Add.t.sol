@@ -1,26 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import {Test, console2 as console} from "forge-std/Test.sol";
-import "forge-std/StdJson.sol";
+import "./PrecompileTestBase.sol";
 
 import {BlsPrecompiles} from "src/BlsPrecompiles.sol";
 
-contract G1AddTest is Test {
-    struct CaseValid {
-        string Expected;
-        uint256 Gas;
-        string Input;
-        string Name;
-        bool NoBenchmark;
-    }
-
-    struct CaseInvalid {
-        string ExpectedError;
-        string Input;
-        string Name;
-    }
-
+contract G1AddTest is PrecompileTestBase {
     function g1Add(bytes memory input) external view returns (bytes memory) {
         return BlsPrecompiles.g1Add(input);
     }
