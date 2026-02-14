@@ -3,30 +3,53 @@ pragma solidity ^0.8.26;
 
 import "./PrecompileTestBase.sol";
 
-import {BlsPrecompiles} from "src/BlsPrecompiles.sol";
+import {BLSInternal} from "src/BLSInternal.sol";
 
 contract MapFp2ToG2Test is PrecompileTestBase {
-    function mapFp2ToG2(bytes memory input) external view returns (bytes memory result) {
-        return BlsPrecompiles.mapFp2ToG2(input);
-    }
-
     function test_mapFp2ToG2_validVectors() public {
-        vm.pauseGasMetering();
         string memory path = "test/vectors/map_fp2_to_G2_bls.json";
         string memory json = vm.readFile(path);
 
         CaseValid[] memory cases = abi.decode(vm.parseJson(json), (CaseValid[]));
 
         for (uint256 i = 0; i < cases.length; i++) {
+            vm.pauseGasMetering();
             CaseValid memory _case = cases[i];
             bytes memory input = vm.parseBytes(string.concat("0x", _case.Input));
             bytes memory expected = vm.parseBytes(string.concat("0x", _case.Expected));
-            bytes memory result = this.mapFp2ToG2(input);
+            vm.resumeGasMetering();
+            bytes memory result = precompiles.mapFp2ToG2(input);
 
             assertEq(result, expected);
         }
+    }
 
-        vm.resumeGasMetering();
+    function test_mapFp2ToG2_internal_validVectors() public {
+        string memory path = "test/vectors/map_fp2_to_G2_bls.json";
+        string memory json = vm.readFile(path);
+
+        CaseValid[] memory cases = abi.decode(vm.parseJson(json), (CaseValid[]));
+
+        for (uint256 i = 0; i < cases.length; i++) {
+            vm.pauseGasMetering();
+            CaseValid memory _case = cases[i];
+            bytes memory input = vm.parseBytes(string.concat("0x", _case.Input));
+            bytes memory expected = vm.parseBytes(string.concat("0x", _case.Expected));
+            vm.resumeGasMetering();
+
+            uint256 ptr;
+            assembly {
+                ptr := add(input, 0x20)
+            }
+
+            BLSInternal.mapFp2ToG2(ptr);
+
+            assembly {
+                mstore(input, 256)
+            }
+
+            assertEq(input, expected);
+        }
     }
 
     function test_mapFp2ToG2_invalidVectors() public {
@@ -41,9 +64,7 @@ contract MapFp2ToG2Test is PrecompileTestBase {
             bytes memory input = vm.parseBytes(string.concat("0x", _case.Input));
 
             vm.expectRevert();
-            this.mapFp2ToG2(input);
+            invalidPrecompiles.mapFp2ToG2(input);
         }
-
-        vm.resumeGasMetering();
     }
 }

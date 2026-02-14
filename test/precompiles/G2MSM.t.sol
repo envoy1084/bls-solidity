@@ -3,13 +3,9 @@ pragma solidity ^0.8.26;
 
 import "./PrecompileTestBase.sol";
 
-import {BlsPrecompiles} from "src/BlsPrecompiles.sol";
+import {BLSInternal} from "src/BLSInternal.sol";
 
 contract G2MSMTest is PrecompileTestBase {
-    function g2MSM(bytes memory input) external view returns (bytes memory result) {
-        return BlsPrecompiles.g2MSM(input);
-    }
-
     function test_g2Msm_validVectors() public {
         vm.pauseGasMetering();
         string memory path = "test/vectors/msm_G2_bls.json";
@@ -18,14 +14,50 @@ contract G2MSMTest is PrecompileTestBase {
         CaseValid[] memory cases = abi.decode(vm.parseJson(json), (CaseValid[]));
 
         for (uint256 i = 0; i < cases.length; i++) {
+            vm.pauseGasMetering();
             CaseValid memory _case = cases[i];
             bytes memory input = vm.parseBytes(string.concat("0x", _case.Input));
             bytes memory expected = vm.parseBytes(string.concat("0x", _case.Expected));
-            bytes memory result = this.g2MSM(input);
+            vm.resumeGasMetering();
+            bytes memory result = precompiles.g2MSM(input);
 
             assertEq(result, expected);
         }
 
+        vm.resumeGasMetering();
+    }
+
+    function test_g2Msm_internal_validVectors() public {
+        vm.pauseGasMetering();
+        string memory path = "test/vectors/msm_G2_bls.json";
+        string memory json = vm.readFile(path);
+
+        CaseValid[] memory cases = abi.decode(vm.parseJson(json), (CaseValid[]));
+        vm.resumeGasMetering();
+
+        for (uint256 i = 0; i < cases.length; i++) {
+            vm.pauseGasMetering();
+            CaseValid memory _case = cases[i];
+            bytes memory input = vm.parseBytes(string.concat("0x", _case.Input));
+            bytes memory expected = vm.parseBytes(string.concat("0x", _case.Expected));
+
+            vm.resumeGasMetering();
+
+            uint256 len = input.length / 288;
+
+            uint256 ptr;
+            assembly {
+                ptr := add(input, 0x20)
+            }
+
+            BLSInternal.g2MSM(ptr, len);
+
+            assembly {
+                mstore(input, 256)
+            }
+
+            assertEq(input, expected);
+        }
         vm.resumeGasMetering();
     }
 
@@ -41,9 +73,7 @@ contract G2MSMTest is PrecompileTestBase {
             bytes memory input = vm.parseBytes(string.concat("0x", _case.Input));
 
             vm.expectRevert();
-            this.g2MSM(input);
+            invalidPrecompiles.g2MSM(input);
         }
-
-        vm.resumeGasMetering();
     }
 }

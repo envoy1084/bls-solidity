@@ -3,6 +3,10 @@ pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
+import {BLSPrecompilesBase} from "./BLSPrecompilesBase.sol";
+
+contract BLSPrecompilesInvalidBase is BLSPrecompilesBase {}
+
 struct CaseValid {
     string Expected;
     uint256 Gas;
@@ -17,4 +21,12 @@ struct CaseInvalid {
     string Name;
 }
 
-contract PrecompileTestBase is Test {}
+contract PrecompileTestBase is Test {
+    BLSPrecompilesBase public precompiles;
+    BLSPrecompilesInvalidBase public invalidPrecompiles;
+
+    function setUp() public virtual {
+        precompiles = new BLSPrecompilesBase();
+        invalidPrecompiles = new BLSPrecompilesInvalidBase();
+    }
+}

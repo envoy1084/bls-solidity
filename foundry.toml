@@ -9,8 +9,9 @@ optimizer_runs = 20000
 ffi = true
 src = "src"
 out = "out"
+via_ir = true
 dynamic_test_linking = true
-gas_reports = ["*"]
+gas_reports = ["BLSPrecompilesBase"]
 libs = ["dependencies"]
 fs_permissions = [{ access = "read-write", path = "./" }]
 

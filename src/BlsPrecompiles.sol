@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-library BlsPrecompiles {
+library BLSPrecompiles {
     /// @dev EIP-2537 precompile: G1 addition
     uint256 internal constant G1_ADD = 0x0b;
 
