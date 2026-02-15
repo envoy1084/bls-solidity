@@ -28,6 +28,10 @@ timeout = 600
 [fmt]
 auto_format = true
 
+[lint]
+ignore = ["test/**/*.sol"]
+exclude_lints = ["mixed-case-function"]
+
 # Dependencies
 [dependencies]
 forge-std = "1.14.0"
