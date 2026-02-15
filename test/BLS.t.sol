@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.30 <0.9.0;
 
-import {BLSBase} from "./BLSBase.sol";
 import {BLS} from "src/BLS.sol";
 
 import {Test} from "forge-std/Test.sol";
@@ -9,8 +8,6 @@ import {Test} from "forge-std/Test.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
 contract BLSGasTest is Test {
-    BLSBase public bls;
-
     BLS.G1 public a;
     BLS.G1 public two_a;
     BLS.G2 public b;
@@ -20,8 +17,6 @@ contract BLSGasTest is Test {
     BLS.Fp2 public d;
 
     function setUp() public {
-        bls = new BLSBase();
-
         a = BLS.G1({
             x: BLS.Fp({
                 a0: 31827880280837800241567138048534752271,
@@ -107,9 +102,13 @@ contract BLSGasTest is Test {
         });
     }
 
-    function test_g1Add() public view {
+    function test_g1Add() public {
         BLS.G1 memory _a = a;
-        BLS.G1 memory result = bls.g1Add(_a, _a);
+        uint256 gasBefore = gasleft();
+        BLS.G1 memory result = BLS.g1Add(_a, _a);
+        uint256 gasUsed = gasBefore - gasleft();
+
+        // emit log_named_uint("g1Add gas", gasUsed);
 
         assertEq(result.x.a0, two_a.x.a0);
         assertEq(result.x.a1, two_a.x.a1);
@@ -119,7 +118,7 @@ contract BLSGasTest is Test {
 
     function test_g2Add() public view {
         BLS.G2 memory _b = b;
-        BLS.G2 memory result = bls.g2Add(_b, _b);
+        BLS.G2 memory result = BLS.g2Add(_b, _b);
 
         assertEq(result.x.c0.a0, two_b.x.c0.a0);
         assertEq(result.x.c0.a1, two_b.x.c0.a1);
@@ -136,7 +135,7 @@ contract BLSGasTest is Test {
         points[0] = a;
         BLS.Fr[] memory scalars = new BLS.Fr[](1);
         scalars[0] = BLS.Fr.wrap(2);
-        BLS.G1 memory result = bls.g1MSM(points, scalars);
+        BLS.G1 memory result = BLS.g1MSM(points, scalars);
 
         assertEq(result.x.a0, two_a.x.a0);
         assertEq(result.x.a1, two_a.x.a1);
@@ -149,7 +148,7 @@ contract BLSGasTest is Test {
         points[0] = b;
         BLS.Fr[] memory scalars = new BLS.Fr[](1);
         scalars[0] = BLS.Fr.wrap(2);
-        BLS.G2 memory result = bls.g2MSM(points, scalars);
+        BLS.G2 memory result = BLS.g2MSM(points, scalars);
 
         assertEq(result.x.c0.a0, two_b.x.c0.a0);
         assertEq(result.x.c0.a1, two_b.x.c0.a1);
@@ -167,14 +166,14 @@ contract BLSGasTest is Test {
         BLS.G2[] memory g2Points = new BLS.G2[](1);
         g2Points[0] = BLS.g2Infinity();
 
-        bool res = bls.pairing(g1Points, g2Points);
+        bool res = BLS.pairing(g1Points, g2Points);
 
         assertEq(res, true);
     }
 
     function test_mapToG1() public view {
         BLS.Fp memory x = c;
-        BLS.G1 memory result = bls.mapToG1(x);
+        BLS.G1 memory result = BLS.mapToG1(x);
 
         assertEq(result.x.a0, 786185784121070347983762658163399044);
         assertEq(result.x.a1, 89380540412990044343987908056033957202863212073198789345757892709311155056237);
@@ -184,7 +183,7 @@ contract BLSGasTest is Test {
 
     function test_mapToG2() public view {
         BLS.Fp2 memory x = d;
-        BLS.G2 memory result = bls.mapToG2(x);
+        BLS.G2 memory result = BLS.mapToG2(x);
 
         assertEq(result.x.c0.a0, 22009286904455570018892449804647912186);
         assertEq(result.x.c0.a1, 15395538823415676683791197694772880263016323450987704046063237764544623690783);
