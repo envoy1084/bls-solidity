@@ -26,13 +26,13 @@ This library provides efficient access to BLS12-381 elliptic curve operations on
 
 ```bash
 # Install via forge
-forge install unified-channels/bls-solidity
+forge install envoy1084/bls-solidity
 
 # Or install with soldeer
 forge soldeer install bls-solidity
 
 # Or add as a submodule
-git submodule add https://github.com/unified-channels/bls-solidity.git lib/bls-solidity
+git submodule add https://github.com/envoy1084/bls-solidity.git lib/bls-solidity
 ```
 
 ### Import in Your Contract
@@ -493,7 +493,7 @@ All EIP-2537 precompiles are implemented:
 
 ```bash
 # Clone repository
-git clone https://github.com/unified-channels/bls-solidity.git
+git clone https://github.com/envoy1084/bls-solidity.git
 cd bls-solidity
 
 # Install dependencies
